@@ -31,7 +31,10 @@ public class Address {
     void send(TokenContract contract, Double balanceToSend){
         //en construcción
         if (this.balance >= balanceToSend){
-            contract.payable(contract.owner(), balanceToSend);
+            double supplies = contract.payable(contract.owner(), balanceToSend);
+            contract.transfer(contract.owner().getPK(), this.getPK(), supplies);
+            this.balance -= balanceToSend;
+            contract.owner().transferEZI(balanceToSend);
         } else {
             //no hagas nada, en plan, nada
         }
@@ -39,6 +42,6 @@ public class Address {
 
     @Override
     public String toString(){
-        return String.format("Esta es la publicKey: %s %n y este su balance: %d", this.publicKey.hashCode(), this.balance);
+        return String.format("Esta es la publicKey: %s y este su balance: %s", this.publicKey.hashCode(), this.balance);
     }
 }

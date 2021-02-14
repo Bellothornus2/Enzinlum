@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class TokenContract {
     //propiedades
-    private final PublicKey owner; 
+    private final Address owner; 
     private String name = "";
     private String symbol = "";
     private int supplies = 0;
@@ -14,10 +14,10 @@ public class TokenContract {
     private Map<PublicKey, Double> table = new HashMap<PublicKey,Double>();
     //constructor
     TokenContract(Address address){
-        this.owner = address.getPK();
+        this.owner = address;
     }
     //getters
-    PublicKey owner(){
+    Address owner(){
         return this.owner;
     }
     String name(){
@@ -90,12 +90,17 @@ public class TokenContract {
     }
     //método desde owner a cliente
     void transfer(PublicKey publicKey, double supplies){
-        if (this.require(this.owner, supplies)){
-            double total =  this.table.get(this.owner) - supplies;
+        if (this.require(this.owner.getPK(), supplies)){
+            double total =  this.table.get(this.owner.getPK()) - supplies;
             //actualizamos los tokens del owner
-            this.table.put(this.owner, total);
+            this.table.put(this.owner.getPK(), total);
             //metemos y actualizamos los tokens del cliente
-            this.table.put(publicKey, supplies);
+            if (this.table.get(publicKey) == null){
+                this.addOwner(publicKey, supplies);
+            } else {
+                double totalCliente = this.table.get(publicKey) + supplies;
+                this.table.put(publicKey, totalCliente);
+            }
         } else {
             // no hagas nada, en plan, nada
         }
@@ -107,23 +112,36 @@ public class TokenContract {
             //actualizamos los tokens del cliente origen
             this.table.put(publicKeyOrigen, total);
             //actualizamos los tokens del cliente destino
-            this.table.put(publicKeyDestino, supplies);
+            if (this.table.get(publicKeyDestino) == null){
+                this.addOwner(publicKeyDestino, supplies);
+            } else {
+                double totalCliente = this.table.get(publicKeyDestino) + supplies;
+                this.table.put(publicKeyDestino, totalCliente);
+            }
         } else {
             // no hagas nada, en plan, nada
         }
     }
     //método desde cliente a cliente con tokens de por medio:
     void transfer(PublicKey publicKeyOrigen, PublicKey publicKeyDestino, double supplies, double tokens){
-
+        //
     }
     //método desde cliente a owner con Enziniums
-    void payable(PublicKey ownerContract, Double balanceToSend){
+    double payable(Address ownerContract, Double balanceToSend){
         //hay que ver si tiene el suficiente token dependiendo de los enzinums
         //this.table.get(this.owner) nos da la cantidad de tokens que tiene
         //balanceToSend/this.price // nos indicaría cuantos entradas compraría morty
         double tokensToGet = balanceToSend/this.price;
-        if (require(this.owner, tokensToGet)) {
-            this.transfer(this.owner, supplies);
+        double answer = 0d;
+        if (require(ownerContract.getPK(), tokensToGet)) {
+            //this.transfer(ownerContract.getPK(), tokensToGet);
+            //this.owner.transferEZI(+balanceToSend);
+            answer = tokensToGet;
         }
+        return answer;
+    }
+    @Override
+    public String toString(){
+        return String.format("%s, %s, %s",this.name, this.symbol, this.owner);
     }
 }

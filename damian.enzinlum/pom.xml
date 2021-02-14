@@ -55,13 +55,33 @@
             <archive>
               <manifest>
                 <addClasspath>true</addClasspath>
-                <mainClass>edu.ping.damian.enzinlum.develop.appalma.BiciPalma</mainClass>
+                <mainClass>edu.ping.damian.enzinlum.develop.App</mainClass>
               </manifest>
               <manifestEntries>
                 <url>${project.url}</url>
               </manifestEntries>
               </archive>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <!--mvn clean jacoco:prepare-agent install jacoco:report-->
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.6</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>test</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
